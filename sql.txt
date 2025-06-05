@@ -1,0 +1,108 @@
+DROP TABLE IF EXISTS order_items;
+DROP TABLE IF EXISTS orders;
+DROP TABLE IF EXISTS products;
+DROP TABLE IF EXISTS customers;
+CREATE TABLE customers (
+    customer_id INTEGER PRIMARY KEY,
+    name TEXT,
+    email TEXT,
+    created_at DATE
+);
+
+-- Create products table
+CREATE TABLE products (
+    product_id INTEGER PRIMARY KEY,
+    product_name TEXT,
+    category TEXT,
+    price REAL
+);
+
+-- Create orders table
+CREATE TABLE orders (
+    order_id INTEGER PRIMARY KEY,
+    customer_id INTEGER,
+    order_date DATE,
+    total_amount REAL,
+    FOREIGN KEY (customer_id) REFERENCES customers(customer_id)
+);
+
+-- Create order_items table
+CREATE TABLE order_items (
+    order_item_id INTEGER PRIMARY KEY,
+    order_id INTEGER,
+    product_id INTEGER,
+    quantity INTEGER,
+    price REAL,
+    FOREIGN KEY (order_id) REFERENCES orders(order_id),
+    FOREIGN KEY (product_id) REFERENCES products(product_id)
+);
+-- Insert into customers
+INSERT INTO customers VALUES
+(1, 'Aarav Sharma', 'aarav@gmail.com', '2024-01-15'),
+(2, 'Meera Jain', 'meera@gmail.com', '2024-02-10'),
+(3, 'Rohit Sen', 'rohit@gmail.com', '2024-03-05');
+
+-- Insert into products
+INSERT INTO products VALUES
+(1, 'Laptop', 'Electronics', 50000),
+(2, 'Phone', 'Electronics', 25000),
+(3, 'Shoes', 'Apparel', 3000),
+(4, 'T-shirt', 'Apparel', 1000);
+
+-- Insert into orders
+INSERT INTO orders VALUES
+(1, 1, '2024-03-20', 53000),
+(2, 2, '2024-03-22', 26000),
+(3, 3, '2024-03-25', 3000);
+
+-- Insert into order_items
+INSERT INTO order_items VALUES
+(1, 1, 1, 1, 50000),
+(2, 1, 4, 3, 1000),
+(3, 2, 2, 1, 25000),
+(4, 3, 3, 1, 3000);
+
+--SELECT
+SELECT * FROM customers;
+
+--WHERE
+SELECT * FROM orders WHERE total_amount > 10000;
+
+--ORDER BY
+SELECT * FROM products ORDER BY price DESC;
+
+--GROUP BY + Aggregate
+SELECT category, AVG(price) AS avg_price
+FROM products
+GROUP BY category;
+
+--INNER JOIN
+SELECT c.name, o.order_date, o.total_amount
+FROM customers c
+INNER JOIN orders o ON c.customer_id = o.customer_id;
+
+--LEFT JOIN
+SELECT c.name, o.order_id
+FROM customers c
+LEFT JOIN orders o ON c.customer_id = o.customer_id;
+
+--SUBQUERIES
+SELECT name FROM customers
+WHERE customer_id IN (
+    SELECT customer_id
+    FROM orders
+    WHERE total_amount > (SELECT AVG(total_amount) FROM orders)
+);
+
+
+-- Drop the view if it already exists
+DROP VIEW IF EXISTS high_value_orders;
+
+-- Create the view again
+CREATE VIEW high_value_orders AS
+SELECT * FROM orders
+WHERE total_amount > 1000;
+SELECT * FROM high_value_orders;
+
+--INDEXING
+CREATE INDEX idx_customer_id ON orders(customer_id);
